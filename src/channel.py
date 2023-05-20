@@ -8,10 +8,17 @@ import isodate
 api_key: str = os.getenv('YT_API_KEY')
 API_KEY = 'AIzaSyCIahIyeqPHc9mVu6VkHB0rJ9zoGjXKKAg'
 
-# создать специальный объект для работы с API
-youtube = build('youtube', 'v3', developerKey=api_key)
+
 class Channel:
     """Класс для ютуб-канала"""
+
+    @classmethod
+    def get_service(cls):
+        """
+        Возвращает объект для работы с YouTube API.
+        """
+        youtube = build('youtube', 'v3', developerKey=API_KEY)
+        return youtube
 
     def __init__(self, channel_id: str) -> None:
         """Экземпляр инициализируется id канала.
@@ -23,7 +30,7 @@ class Channel:
         # количество подписчиков
         # количество видео
         # общее количество просмотров
-        channel = youtube.channels().list(id=channel_id, part='snippet,statistics').execute()
+        channel = Channel.get_service().channels().list(id=channel_id, part='snippet,statistics').execute()
         self._channel_id = channel_id
         self.title = channel['items'][0]['snippet']['title']
         self.description = channel['items'][0]['snippet']['description']
@@ -34,20 +41,13 @@ class Channel:
 
     def print_info(self) -> None:
         """Выводит в консоль информацию о канале."""
-        channel = youtube.channels().list(
+        channel = Channel.get_service().channels().list(
             id=self.channel_id,
             part='snippet,statistics'
         ).execute()
         info = json.dumps(channel, indent=2, ensure_ascii=False)
         print(info)
 
-    @classmethod
-    def get_service(cls):
-        """
-        Возвращает объект для работы с YouTube API.
-        """
-        service = build('youtube', 'v3', developerKey=API_KEY)
-        return service
 
     def to_json(self, filename: str) -> None:
         """Сохраняет значения атрибутов экземпляра в файл в формате json."""
