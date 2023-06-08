@@ -1,14 +1,23 @@
-
 from src.channel import Channel
+
 class Video(Channel):
     def __init__(self, video_id: str) -> None:
-        video_response = self.get_service().videos().list(part='snippet,statistics,contentDetails,topicDetails',
+        try:
+            video_response = self.get_service().videos().list(part='snippet,statistics,contentDetails,topicDetails',
                                                id=video_id
                                                ).execute()
+            self.video_id = video_id
+            self.title = video_response['items'][0]['snippet']['title']
+            self.url = 'https://www.youtube.com/watch?v=' + video_id
+            self.viewCount = video_response['items'][0]['statistics']['viewCount']
+            self.like_count = video_response['items'][0]['statistics']['likeCount']
+        except IndexError:
+            self.title = None
+            self.url = None
+            self.viewCount = None
+            self.like_count = None
         self.video_id = video_id
-        self.title = video_response['items'][0]['snippet']['title']
-        self.url = 'https://www.youtube.com/watch?v=' + video_id
-        self.viewCount = video_response['items'][0]['statistics']['viewCount']
+
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.video_id}, {self.title}, {self.url}, {self.viewCount})"
@@ -25,6 +34,3 @@ class PLVideo(Video):
 
         super().__init__(video_id)
         self.playlist_id = playlist_id
-
-video1 = Video('AWX4JnAnjBE')  # 'AWX4JnAnjBE' - это id видео из ютуб
-print()
